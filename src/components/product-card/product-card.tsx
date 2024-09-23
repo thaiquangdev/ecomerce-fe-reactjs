@@ -14,7 +14,7 @@ const ProductCard = () => {
   return (
     <div className="border rounded-md p-5">
       <div className="mb-6 text-center relative">
-        <Link to="" className="flex items-center justify-center">
+        <Link to="/product/slug" className="flex items-center justify-center">
           <img src={product1} alt="" className="h-[120px] w-[180px]" />
         </Link>
         <div className="absolute top-2 left-0 right-0 flex items-center justify-between px-4">
@@ -28,7 +28,7 @@ const ProductCard = () => {
         </div>
       </div>
       <div>
-        <Link to="" className="text-sm leading-5 block mb-3">
+        <Link to="/product/slug" className="text-sm leading-5 block mb-3">
           Microwave Oven With LED Lighting - 700 Watts, 0.7 cu ft
         </Link>
         <div className="flex items-center gap-1 text-sm text-[#fdc010] mb-5">

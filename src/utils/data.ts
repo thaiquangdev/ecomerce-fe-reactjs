@@ -6,6 +6,10 @@ import bestDealImg1 from "../assets/images/best-deal-img-1.png";
 import bestDealImg2 from "../assets/images/best-deal-img-2.png";
 import bestDealImg3 from "../assets/images/best-deal-img-3.png";
 import bestDealImg4 from "../assets/images/best-deal-img-4.png";
+import iconTruct from "../assets/images/icon-truct.png";
+import iconPayment from "../assets/images/icon-payment.png";
+import iconWallet from "../assets/images/icon-wallet.png";
+import iconSupport from "../assets/images/icon-support.png";
 
 const { IoFlashOutline } = icons;
 
@@ -62,5 +66,28 @@ export const bestDeal = [
     title: "Premium Headphones",
     description: "Up to 40% off today!",
     img: bestDealImg4,
+  },
+];
+
+export const servicesArea = [
+  {
+    title: "Fast Delivery",
+    descritpion: "Experience Lightning-Fast Delivery",
+    img: iconTruct,
+  },
+  {
+    title: "Secured Payment",
+    descritpion: "Shop with Confidence",
+    img: iconPayment,
+  },
+  {
+    title: "Money Back",
+    descritpion: "100% Money-Back Guarantee",
+    img: iconWallet,
+  },
+  {
+    title: "24/7 Support",
+    descritpion: "Always Here for You",
+    img: iconSupport,
   },
 ];

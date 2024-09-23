@@ -2,10 +2,13 @@ import React from "react";
 
 interface InputProps {
   type: string;
-  place: string;
+  place?: string;
   classN: string;
   name?: string;
   val?: string | number;
+  id?: string;
+  min?: string;
+  max?: string;
   onCh?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 

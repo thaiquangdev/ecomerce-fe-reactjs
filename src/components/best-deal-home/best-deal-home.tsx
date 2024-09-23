@@ -4,7 +4,7 @@ import { bestDeal } from "../../utils/data";
 
 const BestDealHome = () => {
   return (
-    <div className="max-w-xl px-2 sm:px-4 md:px-8 lg:px-16 mx-auto pt-[62px] pb-[35px]">
+    <div className="max-w-xl mx-auto pt-[62px] pb-[35px]">
       <div className="mb-[38px] flex items-center justify-between">
         <h3 className="text-lg font-semibold">Today's Best Deals</h3>
         <Link to="" className="text-md text-[#5092f7]">

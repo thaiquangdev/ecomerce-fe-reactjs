@@ -8,7 +8,7 @@ import "swiper/css/navigation";
 
 const ThisMonthSaleHome = () => {
   return (
-    <div className="max-w-xl px-2 sm:px-4 md:px-8 lg:px-16 mx-auto pb-[60px]">
+    <div className="max-w-xl mx-auto pb-[60px]">
       <div className="mb-[38px] flex items-center justify-between">
         <h3 className="text-lg font-semibold">This Month Sales</h3>
         <Link to="" className="text-md text-[#5092f7]">
