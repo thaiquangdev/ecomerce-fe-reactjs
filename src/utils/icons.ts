@@ -1,4 +1,8 @@
-import { IoFlashOutline, IoLocationOutline } from "react-icons/io5";
+import {
+  IoFlashOutline,
+  IoLocationOutline,
+  IoEyeOutline,
+} from "react-icons/io5";
 import { IoIosArrowDown, IoIosStar } from "react-icons/io";
 import { RiUser3Line } from "react-icons/ri";
 import { AiOutlineHeart } from "react-icons/ai";
@@ -6,6 +10,7 @@ import { LiaShoppingCartSolid } from "react-icons/lia";
 import { MdOutlineLocalPhone } from "react-icons/md";
 import { FaCheck } from "react-icons/fa6";
 import { CiDeliveryTruck } from "react-icons/ci";
+import { TiPlus, TiMinus } from "react-icons/ti";
 
 export const icons = {
   IoFlashOutline,
@@ -18,4 +23,7 @@ export const icons = {
   IoIosStar,
   FaCheck,
   CiDeliveryTruck,
+  TiPlus,
+  TiMinus,
+  IoEyeOutline,
 };
