@@ -11,6 +11,7 @@ import { MdOutlineLocalPhone } from "react-icons/md";
 import { FaCheck } from "react-icons/fa6";
 import { CiDeliveryTruck } from "react-icons/ci";
 import { TiPlus, TiMinus } from "react-icons/ti";
+import { FaRegTrashAlt } from "react-icons/fa";
 
 export const icons = {
   IoFlashOutline,
@@ -26,4 +27,5 @@ export const icons = {
   TiPlus,
   TiMinus,
   IoEyeOutline,
+  FaRegTrashAlt,
 };

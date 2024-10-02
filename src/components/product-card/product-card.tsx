@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import product1 from "../../assets/images/product-1.png";
 import { icons } from "../../utils/icons";
+import { formatCurrencyVND } from "../../utils/helper";
 
 const {
   IoIosStar,
@@ -10,17 +10,36 @@ const {
   AiOutlineHeart,
 } = icons;
 
-const ProductCard = () => {
+interface ProductProps {
+  thumb: string;
+  title: string;
+  review: number;
+  price: number;
+  slug: string;
+  discount: number;
+}
+
+const ProductCard: React.FC<ProductProps> = ({
+  thumb,
+  title,
+  review,
+  price,
+  slug,
+  discount,
+}) => {
   return (
     <div className="border rounded-md p-5">
       <div className="mb-6 text-center relative">
-        <Link to="/product/slug" className="flex items-center justify-center">
-          <img src={product1} alt="" className="h-[120px] w-[180px]" />
+        <Link
+          to={`/product/${slug}`}
+          className="flex items-center justify-center"
+        >
+          <img src={thumb} alt="" className="h-full w-[180px]" />
         </Link>
         <div className="absolute top-2 left-0 right-0 flex items-center justify-between px-4">
           {" "}
           <span className="text-white rounded-md px-2 py-1 bg-[#ff4659]">
-            -11%
+            -{discount}%
           </span>
           <span className="bg-[#f8f8f8] hover:bg-[#ff4659] hover:text-white cursor-pointer px-2 py-2 rounded-full">
             <AiOutlineHeart size={20} />
@@ -29,7 +48,7 @@ const ProductCard = () => {
       </div>
       <div>
         <Link to="/product/slug" className="text-sm leading-5 block mb-3">
-          Microwave Oven With LED Lighting - 700 Watts, 0.7 cu ft
+          {title}
         </Link>
         <div className="flex items-center gap-1 text-sm text-[#fdc010] mb-5">
           <IoIosStar />
@@ -37,10 +56,13 @@ const ProductCard = () => {
           <IoIosStar />
           <IoIosStar />
           <IoIosStar />
-          <span className="text-black">(12 reviews)</span>
+          <span className="text-black">({review} reviews)</span>
         </div>
         <h3 className="mb-5">
-          $399 <del className="font-thin">$450</del>
+          {formatCurrencyVND(price)}{" "}
+          <del className="font-thin">
+            {discount === 0 ? "" : formatCurrencyVND(price - price * discount)}
+          </del>
         </h3>
         <div className="flex items-center justify-between text-sm mb-3">
           <span className="text-[#ff4b55]">620 Sold</span>

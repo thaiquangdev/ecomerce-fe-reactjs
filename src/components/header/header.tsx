@@ -13,6 +13,7 @@ const {
 } = icons;
 
 const Header = () => {
+  const token = localStorage.getItem("token");
   return (
     <div className="">
       <div className="xl:max-w-xl lg:max-w-lg md:max-w-md sm:max-w-sm mx-auto px-4 py-4">
@@ -43,20 +44,25 @@ const Header = () => {
           <ul className="flex items-center gap-5">
             {/* Login */}
             <li>
-              <Link to="/login" className="flex items-center gap-2">
+              <Link
+                to={`${token ? "/" : "/login"}`}
+                className="flex items-center gap-2"
+              >
                 <span className="px-3 py-3 rounded-full bg-gray-100 hover:bg-[#5092f7] hover:text-white">
                   <RiUser3Line size={24} />
                 </span>
                 <span className="text-sm hidden md:inline-block font-light">
-                  Login Your <br />{" "}
-                  <span className="font-semibold">Account</span>
+                  {`${token ? "Hello" : "Login Your"}`} <br />
+                  <span className="font-semibold">{`${
+                    token ? "Customer" : "Account"
+                  }`}</span>
                 </span>
               </Link>
             </li>
 
             {/* Wishlist */}
             <li className="relative">
-              <Link to="/login" className="flex items-center gap-2">
+              <Link to="/wishlist" className="flex items-center gap-2">
                 <span className="px-3 py-3 rounded-full bg-gray-100 hover:bg-[#5092f7] hover:text-white">
                   <AiOutlineHeart size={24} />
                 </span>

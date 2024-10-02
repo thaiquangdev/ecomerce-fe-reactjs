@@ -1,14 +1,78 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import macbook from "../../assets/images/macbook.png";
 import { icons } from "../../utils/icons";
 import Input from "../../components/input";
 import Button from "../../components/button";
+import { useParams } from "react-router-dom";
+import { getProductApi } from "../../services/apis/products";
+import { formatCurrencyVND } from "../../utils/helper";
 
 const { FaCheck, IoIosStar, TiMinus, TiPlus, AiOutlineHeart, IoEyeOutline } =
   icons;
 
-const ProductDetail = () => {
-  const [active, setActive] = useState("description");
+interface Product {
+  title: string;
+  images: { url: string }[];
+  price: number;
+  discount: number;
+  reviews: number;
+  description: string;
+  brand: string;
+  category: string;
+  skus: { storage: string; color: string; price: number }[]; // Thêm thuộc tính price
+}
+
+const ProductDetail: React.FC = () => {
+  const [active, setActive] = useState<string>("description");
+  const [product, setProduct] = useState<Product | null>(null);
+  const [image, setImage] = useState<number>(0);
+  const [selectedStorage, setSelectedStorage] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null); // Thêm trạng thái cho màu sắc
+  const { slug } = useParams<{ slug: string }>();
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      const response = await getProductApi(slug);
+      if (response.data.success) {
+        setProduct(response.data.data);
+        // Thiết lập storage mặc định là cái đầu tiên
+        const defaultStorage = response.data.data.skus[0]?.storage;
+        setSelectedStorage(defaultStorage);
+      }
+    };
+    fetchProduct();
+  }, [slug]);
+
+  console.log(product);
+
+  const uniqueStorages = Array.from(
+    new Set(product?.skus.map((sku) => sku.storage))
+  );
+
+  const handleStorageClick = (storage: string) => {
+    setSelectedStorage(storage);
+    setSelectedColor(null); // Reset màu sắc khi chọn storage mới
+  };
+
+  const handleColorClick = (color: string) => {
+    setSelectedColor(color);
+  };
+
+  const getColorsForStorage = (storage: string) => {
+    const colors = product?.skus
+      .filter((sku) => sku.storage === storage)
+      .map((sku) => sku.color);
+
+    return colors ? colors : [];
+  };
+
+  // Tìm giá sản phẩm dựa vào storage và color đã chọn
+  const getCurrentPrice = () => {
+    const sku = product?.skus.find(
+      (sku) => sku.storage === selectedStorage && sku.color === selectedColor
+    );
+    return sku ? sku.price : product?.price;
+  };
 
   return (
     <div className="pt-[30px] pb-[60px] max-w-xl mx-auto">
@@ -17,7 +81,7 @@ const ProductDetail = () => {
           <div>
             <div className="border p-[57px] rounded-md text-center flex items-start justify-center">
               <img
-                src={macbook}
+                src={product?.images[image]?.url}
                 alt=""
                 className="max-w-full h-full object-contain"
               />
@@ -25,48 +89,19 @@ const ProductDetail = () => {
           </div>
           <div className="mt-[20px]">
             <div className="flex gap-3 items-center justify-center">
-              <div className="p-5 rounded-md border">
-                <img
-                  src={macbook}
-                  alt=""
-                  className="w-[50px] h-[51px] object-contain"
-                />
-              </div>
-              <div className="p-5 rounded-md border">
-                <img
-                  src={macbook}
-                  alt=""
-                  className="w-[50px] h-[51px] object-contain"
-                />
-              </div>
-              <div className="p-5 rounded-md border">
-                <img
-                  src={macbook}
-                  alt=""
-                  className="w-[50px] h-[51px] object-contain"
-                />
-              </div>
-              <div className="p-5 rounded-md border">
-                <img
-                  src={macbook}
-                  alt=""
-                  className="w-[50px] h-[51px] object-contain"
-                />
-              </div>
-              <div className="p-5 rounded-md border">
-                <img
-                  src={macbook}
-                  alt=""
-                  className="w-[50px] h-[51px] object-contain"
-                />
-              </div>
-              <div className="p-5 rounded-md border">
-                <img
-                  src={macbook}
-                  alt=""
-                  className="w-[50px] h-[51px] object-contain"
-                />
-              </div>
+              {product?.images?.map((item, index) => (
+                <div
+                  className="p-5 rounded-md border cursor-pointer"
+                  key={index}
+                  onClick={() => setImage(index)}
+                >
+                  <img
+                    src={item?.url}
+                    alt=""
+                    className="w-[50px] h-[51px] object-contain"
+                  />
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -74,10 +109,7 @@ const ProductDetail = () => {
           <span className="inline-flex items-center bg-[#ecf4e4] text-[#538c21] text-sm font-regular rounded-md px-2 py-2">
             <FaCheck className="mr-2" /> In Stock
           </span>
-          <h3 className="text-2xl font-semibold mb-[20px]">
-            Apple MacBook Pro 16.2" with Liquid Retina XDR Display, M2 Max Chip
-            with 12-Core CPU
-          </h3>
+          <h3 className="text-2xl font-semibold mb-[20px]">{product?.title}</h3>
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1 text-[#f8c700]">
               <IoIosStar size={20} />
@@ -86,34 +118,52 @@ const ProductDetail = () => {
               <IoIosStar size={20} />
               <IoIosStar size={20} />
             </div>
-            <span className="text-md font-light">(5 Reviews)</span>
+            <span className="text-md font-light">
+              ({product?.reviews} Reviews)
+            </span>
           </div>
           <h2 className="mt-[15px] pt-[15px] mb-[35px] border-t font-semibold text-xl">
-            $399 <del className="text-[#59646b]">$450</del>
+            {formatCurrencyVND(getCurrentPrice())}{" "}
+            <del className="text-[#59646b]">
+              {product?.discount
+                ? ""
+                : formatCurrencyVND(
+                    product?.price - product?.price * product?.discount
+                  )}
+            </del>
           </h2>
           <div className="mb-[10px] flex items-center gap-3">
             <span className="text-md font-light">Capacity:</span>
             <h5 className="text-md font-medium">512GB</h5>
           </div>
           <div className="mb-[16px] flex items-center gap-2">
-            <span className="px-4 py-1 rounded-md border cursor-pointer text-sm font-light">
-              512GB
-            </span>
-            <span className="px-4 py-1 rounded-md border cursor-pointer text-sm font-light">
-              1TB
-            </span>
+            {uniqueStorages.map((item, index) => (
+              <span
+                className="px-4 py-1 rounded-md border cursor-pointer text-sm font-light"
+                key={index}
+                onClick={() => handleStorageClick(item)}
+              >
+                {item}
+              </span>
+            ))}
           </div>
           <div className="mb-[10px] flex items-center gap-3">
             <span className="text-md font-light">Color:</span>
-            <h5 className="text-md font-medium">Black</h5>
+            <h5 className="text-md font-medium">
+              {selectedColor || "Select a color"}
+            </h5>
           </div>
           <div className="mb-[16px] flex items-center gap-2">
-            <span className="px-4 py-1 rounded-md border cursor-pointer text-sm font-light">
-              Black
-            </span>
-            <span className="px-4 py-1 rounded-md border cursor-pointer text-sm font-light">
-              Gray
-            </span>
+            {selectedStorage &&
+              getColorsForStorage(selectedStorage).map((item, index) => (
+                <span
+                  className="px-4 py-1 rounded-md border cursor-pointer text-sm font-light"
+                  key={index}
+                  onClick={() => handleColorClick(item)}
+                >
+                  {item}
+                </span>
+              ))}
           </div>
           <div className="mb-4 flex items-center gap-4">
             <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
@@ -155,44 +205,16 @@ const ProductDetail = () => {
           </div>
           <ul className="mt-[20px] pt-[20px] mb-[20px] border-t">
             <li className="mb-[8px] flex items-center gap-2">
-              <span className="text-[#67983e]">
-                <FaCheck size={16} />
-              </span>
-              <span className="text-sm font-light">Free delivery today</span>
+              <span className="text-sm text-gray-500">SKU:</span>
+              <span className="font-medium">112233445</span>
             </li>
             <li className="mb-[8px] flex items-center gap-2">
-              <span className="text-[#67983e]">
-                <FaCheck size={16} />
-              </span>
-              <span className="text-sm font-light">
-                100% money back Guarantee
-              </span>
+              <span className="text-sm text-gray-500">Category:</span>
+              <span className="font-medium">Laptops</span>
             </li>
             <li className="mb-[8px] flex items-center gap-2">
-              <span className="text-[#67983e]">
-                <FaCheck size={16} />
-              </span>
-              <span className="text-sm font-light">
-                7 days product return policy
-              </span>
-            </li>
-          </ul>
-          <ul className="mt-[20px] pt-[20px] mb-[20px] border-t">
-            <li className="mb-[8px] flex items-center gap-2">
-              <span className="font-light text-sm">SKU:</span>
-              <span className="text-sm font-medium">Free delivery today</span>
-            </li>
-            <li className="mb-[8px] flex items-center gap-2">
-              <span className="font-light text-sm">Category:</span>
-              <span className="text-sm  font-medium">
-                100% money back Guarantee
-              </span>
-            </li>
-            <li className="mb-[8px] flex items-center gap-2">
-              <span className="font-light text-sm">Brand:</span>
-              <span className="text-sm  font-medium">
-                100% money back Guarantee
-              </span>
+              <span className="text-sm text-gray-500">Tags:</span>
+              <span className="font-medium">Laptop, Electronics, PC</span>
             </li>
           </ul>
         </div>
@@ -224,19 +246,9 @@ const ProductDetail = () => {
           Reviews
         </button>
       </div>
-
       {active === "description" && (
         <div className="description-section text-gray-700 leading-7 text-lg">
-          <p className="mb-4">
-            The Apple MacBook Pro 16.2 is a cutting-edge laptop designed to
-            deliver exceptional performance and advanced features for
-            professionals and creative enthusiasts. With its sleek aluminum body
-            and precision engineering, this MacBook Pro represents the pinnacle
-            of Apple's laptop technology. Stay connected with a variety of
-            ports, including Thunderbolt 3, USB-C, and audio jacks. These
-            versatile ports support high-speed data transfer and external device
-            connections.
-          </p>
+          <p className="mb-4">{product?.description}</p>
         </div>
       )}
       {active === "specification" && (
@@ -245,11 +257,11 @@ const ProductDetail = () => {
             <tbody>
               <tr className="bg-gray-100">
                 <td className="border px-4 py-2 font-bold">Brand</td>
-                <td className="border px-4 py-2">Apple</td>
+                <td className="border px-4 py-2">{product?.brand}</td>
               </tr>
               <tr>
                 <td className="border px-4 py-2 font-bold">Category</td>
-                <td className="border px-4 py-2">Laptop</td>
+                <td className="border px-4 py-2">{product?.category}</td>
               </tr>
               <tr className="bg-gray-100">
                 <td className="border px-4 py-2 font-bold">SKU</td>
@@ -257,7 +269,7 @@ const ProductDetail = () => {
               </tr>
               <tr>
                 <td className="border px-4 py-2 font-bold">Price</td>
-                <td className="border px-4 py-2">$399</td>
+                <td className="border px-4 py-2">{product?.price}</td>
               </tr>
             </tbody>
           </table>

@@ -6,7 +6,22 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 
-const ThisMonthSaleHome = () => {
+interface Product {
+  thumb: string;
+  title: string;
+  price: number;
+  slug: string;
+  discount: number;
+  reviews: number;
+  _id: string;
+}
+
+interface ThisMonthSaleHomeProps {
+  products: Array<Product> | null;
+}
+
+const ThisMonthSaleHome = ({ products }: ThisMonthSaleHomeProps) => {
+  console.log(products);
   return (
     <div className="max-w-xl mx-auto pb-[60px]">
       <div className="mb-[38px] flex items-center justify-between">
@@ -29,24 +44,18 @@ const ThisMonthSaleHome = () => {
         pagination={{ clickable: true }} /* Hiển thị chấm tròn điều hướng */
         navigation
       >
-        <SwiperSlide>
-          <ProductCard />
-        </SwiperSlide>
-        <SwiperSlide>
-          <ProductCard />
-        </SwiperSlide>
-        <SwiperSlide>
-          <ProductCard />
-        </SwiperSlide>
-        <SwiperSlide>
-          <ProductCard />
-        </SwiperSlide>
-        <SwiperSlide>
-          <ProductCard />
-        </SwiperSlide>
-        <SwiperSlide>
-          <ProductCard />
-        </SwiperSlide>
+        {products?.map((item) => (
+          <SwiperSlide key={item._id}>
+            <ProductCard
+              title={item.title}
+              thumb={item.thumb.url}
+              price={item.price}
+              discount={item.discount}
+              review={item.reviews}
+              slug={item.slug}
+            />
+          </SwiperSlide>
+        ))}
         {/* Add more slides as needed */}
       </Swiper>
     </div>
