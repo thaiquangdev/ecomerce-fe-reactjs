@@ -6,11 +6,14 @@ import Button from "../../components/button";
 import { useParams } from "react-router-dom";
 import { getProductApi } from "../../services/apis/products";
 import { formatCurrencyVND } from "../../utils/helper";
+import { addToCartApi } from "../../services/apis/cart";
+import toast from "react-hot-toast";
 
 const { FaCheck, IoIosStar, TiMinus, TiPlus, AiOutlineHeart, IoEyeOutline } =
   icons;
 
 interface Product {
+  _id: string;
   title: string;
   images: { url: string }[];
   price: number;
@@ -19,7 +22,7 @@ interface Product {
   description: string;
   brand: string;
   category: string;
-  skus: { storage: string; color: string; price: number }[]; // Thêm thuộc tính price
+  skus: { storage: string; color: string; price: number; sku: string }[];
 }
 
 const ProductDetail: React.FC = () => {
@@ -27,7 +30,10 @@ const ProductDetail: React.FC = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [image, setImage] = useState<number>(0);
   const [selectedStorage, setSelectedStorage] = useState<string | null>(null);
-  const [selectedColor, setSelectedColor] = useState<string | null>(null); // Thêm trạng thái cho màu sắc
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
+  const [price, setPrice] = useState<number>(0);
+  const [sku, setSku] = useState("");
+  const [quantity, setQuantity] = useState<number>(0);
   const { slug } = useParams<{ slug: string }>();
 
   useEffect(() => {
@@ -43,8 +49,6 @@ const ProductDetail: React.FC = () => {
     fetchProduct();
   }, [slug]);
 
-  console.log(product);
-
   const uniqueStorages = Array.from(
     new Set(product?.skus.map((sku) => sku.storage))
   );
@@ -52,10 +56,25 @@ const ProductDetail: React.FC = () => {
   const handleStorageClick = (storage: string) => {
     setSelectedStorage(storage);
     setSelectedColor(null); // Reset màu sắc khi chọn storage mới
+    updateSku(storage, null); // Cập nhật SKU khi thay đổi storage
   };
 
   const handleColorClick = (color: string) => {
     setSelectedColor(color);
+    if (selectedStorage) {
+      updateSku(selectedStorage, color); // Cập nhật SKU khi thay đổi color
+    }
+  };
+
+  const updateSku = (storage: string | null, color: string | null) => {
+    const selectedSku = product?.skus.find(
+      (sku) => sku.storage === storage && sku.color === color
+    );
+    if (selectedSku) {
+      setSku(selectedSku.sku); // Cập nhật SKU
+    } else {
+      setSku(""); // Nếu không tìm thấy, đặt SKU là chuỗi rỗng
+    }
   };
 
   const getColorsForStorage = (storage: string) => {
@@ -72,6 +91,55 @@ const ProductDetail: React.FC = () => {
       (sku) => sku.storage === selectedStorage && sku.color === selectedColor
     );
     return sku ? sku.price : product?.price;
+  };
+
+  // Hàm để tăng số lượng
+  const handleIncrease = () => {
+    setQuantity((prev) => prev + 1);
+  };
+
+  // Hàm để giảm số lượng
+  const handleDecrease = () => {
+    if (quantity > 0) {
+      setQuantity((prev) => prev - 1);
+    }
+  };
+
+  // Hàm để xử lý thay đổi từ input
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value, 10);
+    if (!isNaN(value) && value >= 0) {
+      setQuantity(value);
+    }
+  };
+
+  const handleAddToCart = async () => {
+    const price = getCurrentPrice();
+    console.log({
+      pid: product?._id,
+      quantity: quantity,
+      storage: selectedStorage,
+      color: selectedColor,
+      sku: sku,
+      price: price,
+      discount: product?.discount,
+    });
+    if (!product?._id || quantity <= 0) {
+      toast.error("Chose quantity. Please");
+      return;
+    }
+    const response = await addToCartApi({
+      pid: product._id, // Đảm bảo _id không phải là undefined
+      quantity: quantity,
+      storage: selectedStorage || "", // Giá trị mặc định là chuỗi rỗng
+      color: selectedColor || "", // Giá trị mặc định là chuỗi rỗng
+      sku: sku || "", // Giá trị mặc định là chuỗi rỗng
+      price: price,
+      discount: product?.discount || 0, // Giá trị mặc định là 0 nếu discount là undefined
+    });
+    if (response.data.success === true) {
+      toast.success("Add product is success is successfully");
+    }
   };
 
   return (
@@ -167,19 +235,31 @@ const ProductDetail: React.FC = () => {
           </div>
           <div className="mb-4 flex items-center gap-4">
             <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
-              <button className="px-2 py-2 bg-gray-200 hover:bg-gray-300 transition duration-200">
+              <button
+                onClick={handleDecrease}
+                className="px-2 py-2 bg-gray-200 hover:bg-gray-300 transition duration-200"
+              >
                 <TiMinus size={20} />
               </button>
+
+              {/* Input để hiển thị số lượng */}
               <Input
-                val={0}
+                val={quantity}
                 type="number"
                 classN="w-10 text-center border-0 focus:ring-0 focus:outline-none appearance-none"
+                onCh={handleInputChange} // Xử lý thay đổi số lượng từ input
               />
-              <button className="px-2 py-2 bg-gray-200 hover:bg-gray-300 transition duration-200">
+
+              {/* Nút tăng số lượng */}
+              <button
+                onClick={handleIncrease}
+                className="px-2 py-2 bg-gray-200 hover:bg-gray-300 transition duration-200"
+              >
                 <TiPlus size={20} />
               </button>
             </div>
             <Button
+              onCl={handleAddToCart}
               title="Add to Cart"
               classN="px-6 py-2 rounded-full text-sm font-medium bg-[#4c8c17] text-white"
             />
@@ -206,11 +286,11 @@ const ProductDetail: React.FC = () => {
           <ul className="mt-[20px] pt-[20px] mb-[20px] border-t">
             <li className="mb-[8px] flex items-center gap-2">
               <span className="text-sm text-gray-500">SKU:</span>
-              <span className="font-medium">112233445</span>
+              <span className="font-medium">{sku}</span>
             </li>
             <li className="mb-[8px] flex items-center gap-2">
               <span className="text-sm text-gray-500">Category:</span>
-              <span className="font-medium">Laptops</span>
+              <span className="font-medium">{product?.category}</span>
             </li>
             <li className="mb-[8px] flex items-center gap-2">
               <span className="text-sm text-gray-500">Tags:</span>
@@ -265,7 +345,7 @@ const ProductDetail: React.FC = () => {
               </tr>
               <tr className="bg-gray-100">
                 <td className="border px-4 py-2 font-bold">SKU</td>
-                <td className="border px-4 py-2">01</td>
+                <td className="border px-4 py-2">{sku}</td>
               </tr>
               <tr>
                 <td className="border px-4 py-2 font-bold">Price</td>

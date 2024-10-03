@@ -47,6 +47,7 @@ const ThisMonthSaleHome = ({ products }: ThisMonthSaleHomeProps) => {
         {products?.map((item) => (
           <SwiperSlide key={item._id}>
             <ProductCard
+              _id={item._id}
               title={item.title}
               thumb={item.thumb.url}
               price={item.price}

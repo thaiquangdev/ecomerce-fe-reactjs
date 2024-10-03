@@ -14,7 +14,6 @@ const Home = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       const response = await getProductsApi();
-      console.log(response);
       if (response.data.success === true) {
         setProducts(response.data.data.products);
       }
