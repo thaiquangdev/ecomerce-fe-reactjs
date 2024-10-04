@@ -1,16 +1,93 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Input from "../input";
 
-const ProductsFilterSidebar = () => {
-  const [minPrice, setMinPrice] = useState(0);
-  const [maxPrice, setMaxPrice] = useState(1000);
+interface FilterProps {
+  setFilters: (filters: {
+    categories?: string[];
+    minPrice?: number;
+    maxPrice?: number;
+    brands?: string[];
+    status?: string[];
+  }) => void;
+}
+
+const ProductsFilterSidebar: React.FC<FilterProps> = ({ setFilters }) => {
+  const [categories, setCategories] = useState<string[]>([]);
+  const [minPrice, setMinPrice] = useState<number>(0);
+  const [maxPrice, setMaxPrice] = useState<number>(1000);
+  const [brands, setBrands] = useState<string[]>([]);
+  const [status, setStatus] = useState<string[]>([]);
 
   const handleMinPriceChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setMinPrice(Number(e.target.value));
+
   const handleMaxPriceChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setMaxPrice(Number(e.target.value));
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.name;
+    setCategories((prev) =>
+      prev.includes(value)
+        ? prev.filter((cat) => cat !== value)
+        : [...prev, value]
+    );
+  };
+
+  const handleBrandChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.name;
+    setBrands((prev) =>
+      prev.includes(value)
+        ? prev.filter((brand) => brand !== value)
+        : [...prev, value]
+    );
+  };
+
+  const handleStatusChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.name;
+    setStatus((prev) =>
+      prev.includes(value)
+        ? prev.filter((stat) => stat !== value)
+        : [...prev, value]
+    );
+  };
+
+  const applyFilters = () => {
+    const filters: any = {};
+
+    // Kiểm tra nếu có bộ lọc categories
+    if (categories.length > 0) {
+      filters.category = categories;
+    }
+
+    // Kiểm tra nếu minPrice và maxPrice hợp lệ
+    if (minPrice > 0) {
+      filters.minPrice = minPrice;
+    }
+    if (maxPrice < 1000) {
+      filters.maxPrice = maxPrice;
+    }
+
+    // Kiểm tra nếu có bộ lọc brands
+    if (brands.length > 0) {
+      filters.brand = brands;
+    }
+
+    // Kiểm tra nếu có bộ lọc status
+    if (status.length > 0) {
+      filters.status = status;
+    }
+
+    // Gọi setFilters nếu có bất kỳ bộ lọc nào hợp lệ
+    setFilters(filters);
+  };
+
+  useEffect(() => {
+    applyFilters();
+  }, [categories, minPrice, maxPrice, brands, status]);
+
   return (
     <div className="border-r pr-[24px]">
+      {/* Filter by Categories */}
       <div className="mb-[30px]">
         <h3 className="mb-[15px] text-2xl font-semibold">
           Filter By Categories
@@ -22,70 +99,21 @@ const ProductsFilterSidebar = () => {
                 type="checkbox"
                 classN="px-2 py-2"
                 name="Smartphone-Tablets"
+                onCh={handleCategoryChange}
               />
               <label htmlFor="Smartphone-Tablets" className="text-sm pl-2">
                 Smartphone & Tablets
               </label>
             </div>
           </li>
-          <li className="mb-[10px]">
-            <div className="flex items-center">
-              <Input type="checkbox" classN="px-2 py-2" name="Headphones" />
-              <label htmlFor="Headphones" className="text-sm pl-2">
-                Headphones
-              </label>
-            </div>
-          </li>
-          <li className="mb-[10px]">
-            <div className="flex items-center">
-              <Input type="checkbox" classN="px-2 py-2" name="Smartwatches" />
-              <label htmlFor="Smartwatches" className="text-sm pl-2">
-                Smartwatches
-              </label>
-            </div>
-          </li>
-          <li className="mb-[10px]">
-            <div className="flex items-center">
-              <Input type="checkbox" classN="px-2 py-2" name="SDrone-Camera" />
-              <label htmlFor="Drone-Camera" className="text-sm pl-2">
-                Drone & Camera
-              </label>
-            </div>
-          </li>
-          <li className="mb-[10px]">
-            <div className="flex items-center">
-              <Input type="checkbox" classN="px-2 py-2" name="Electronics" />
-              <label htmlFor="Electronics" className="text-sm pl-2">
-                Electronics
-              </label>
-            </div>
-          </li>
-          <li className="mb-[10px]">
-            <div className="flex items-center">
-              <Input type="checkbox" classN="px-2 py-2" name="Gaming-Device" />
-              <label htmlFor="Gaming-Device" className="text-sm pl-2">
-                Gaming Device
-              </label>
-            </div>
-          </li>
-          <li className="mb-[10px]">
-            <div className="flex items-center">
-              <Input
-                type="checkbox"
-                classN="px-2 py-2"
-                name="Home-Accesories"
-              />
-              <label htmlFor="Home-Accesories" className="text-sm pl-2">
-                Home Accesories
-              </label>
-            </div>
-          </li>
+          {/* Thêm các cấu trúc khác cho những category khác */}
         </ul>
       </div>
+
+      {/* Filter by Price */}
       <div className="mb-[30px]">
         <h3 className="mb-4 text-2xl font-semibold">Filter By Price</h3>
         <form className="flex items-center justify-between mb-6">
-          {/* Min price */}
           <div className="flex flex-col w-1/2 pr-2">
             <label htmlFor="minPrice" className="text-md font-medium mb-2">
               Min price
@@ -97,8 +125,6 @@ const ProductsFilterSidebar = () => {
               classN="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-
-          {/* Max price */}
           <div className="flex flex-col w-1/2 pl-2">
             <label htmlFor="maxPrice" className="text-md font-medium mb-2">
               Max price
@@ -111,8 +137,6 @@ const ProductsFilterSidebar = () => {
             />
           </div>
         </form>
-
-        {/* Price Range Slider */}
         <div className="flex items-center justify-between">
           <Input
             type="range"
@@ -131,85 +155,62 @@ const ProductsFilterSidebar = () => {
             classN="w-1/2 text-[#424242]"
           />
         </div>
-
-        {/* Display selected range */}
         <div className="flex justify-between mt-4 text-gray-700">
           <span className="text-lg font-medium">${minPrice}</span>
           <span className="text-lg font-medium">${maxPrice}</span>
         </div>
       </div>
+
+      {/* Filter by Brands */}
       <div className="mb-[30px]">
         <h3 className="mb-4 text-2xl font-semibold">Filter By Brands</h3>
         <ul>
           <li className="mb-[10px]">
             <div className="flex items-center">
-              <Input type="checkbox" classN="px-2 py-2" name="Apple" />
+              <Input
+                type="checkbox"
+                classN="px-2 py-2"
+                name="Apple"
+                onCh={handleBrandChange}
+              />
               <label htmlFor="Apple" className="text-sm pl-2">
                 Apple
               </label>
             </div>
-          </li>
-          <li className="mb-[10px]">
             <div className="flex items-center">
-              <Input type="checkbox" classN="px-2 py-2" name="Samsung" />
-              <label htmlFor="Samsung" className="text-sm pl-2">
+              <Input
+                type="checkbox"
+                classN="px-2 py-2"
+                name="Samsung"
+                onCh={handleBrandChange}
+              />
+              <label htmlFor="Apple" className="text-sm pl-2">
                 Samsung
               </label>
             </div>
           </li>
-          <li className="mb-[10px]">
-            <div className="flex items-center">
-              <Input type="checkbox" classN="px-2 py-2" name="Motorola" />
-              <label htmlFor="Motorola" className="text-sm pl-2">
-                Motorola
-              </label>
-            </div>
-          </li>
-          <li className="mb-[10px]">
-            <div className="flex items-center">
-              <Input type="checkbox" classN="px-2 py-2" name="Microsoft" />
-              <label htmlFor="Microsoft" className="text-sm pl-2">
-                Microsoft
-              </label>
-            </div>
-          </li>
-          <li className="mb-[10px]">
-            <div className="flex items-center">
-              <Input type="checkbox" classN="px-2 py-2" name="Vivo" />
-              <label htmlFor="Vivo" className="text-sm pl-2">
-                Vivo
-              </label>
-            </div>
-          </li>
+          {/* Thêm các cấu trúc khác cho những brands khác */}
         </ul>
       </div>
+
+      {/* Products Status */}
       <div className="mb-[30px]">
         <h3 className="mb-4 text-2xl font-semibold">Products Status</h3>
         <ul>
           <li className="mb-[10px]">
             <div className="flex items-center">
-              <Input type="checkbox" classN="px-2 py-2" name="In-stock" />
+              <Input
+                type="checkbox"
+                classN="px-2 py-2"
+                name="In-stock"
+                onCh={handleStatusChange}
+              />
               <label htmlFor="In-stock" className="text-sm pl-2">
                 In stock
               </label>
             </div>
           </li>
-          <li className="mb-[10px]">
-            <div className="flex items-center">
-              <Input type="checkbox" classN="px-2 py-2" name="On-Sale" />
-              <label htmlFor="On-Sale" className="text-sm pl-2">
-                On Sale
-              </label>
-            </div>
-          </li>
-          <li className="mb-[10px]">
-            <div className="flex items-center">
-              <Input type="checkbox" classN="px-2 py-2" name="Out-Of-Stock" />
-              <label htmlFor="Out-Of-Stock" className="text-sm pl-2">
-                Out Of Stock
-              </label>
-            </div>
-          </li>
+          {/* Thêm các cấu trúc khác cho những status khác */}
         </ul>
       </div>
     </div>

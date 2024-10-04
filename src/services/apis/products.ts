@@ -1,10 +1,12 @@
 import axios from "../../utils/axiosIntance";
 
-export const getProductsApi = () =>
-  axios({
-    url: "/products",
+export const getProductsApi = (params = {}) => {
+  const queryString = new URLSearchParams(params).toString();
+  return axios({
+    url: `/products${queryString ? `?${queryString}` : ""}`,
     method: "get",
   });
+};
 
 export const getProductApi = (slug: string) =>
   axios({
